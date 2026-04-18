@@ -3,97 +3,160 @@ from tkinter import filedialog, messagebox, ttk
 import json
 import os
 import subprocess
+import ctypes
 from sync import SyncEngine
 
 class App:
     def __init__(self, root):
         self.root = root
         self.root.title("Claude to Obsidian Sync")
-        self.root.geometry("700x550")
+        self.root.geometry("700x620")
+        self.root.resizable(False, False)
         
         self.config_path = os.path.join(os.path.dirname(__file__), 'config.json')
         self.load_config()
         
-        # Theme Colors
-        self.dark_bg = "#1e1e1e"
+        # Windows 11 Fluent-ish Colors
+        self.dark_bg = "#1c1c1c"
+        self.dark_card = "#2d2d2d"
         self.dark_fg = "#ffffff"
-        self.dark_btn = "#333333"
-        self.light_bg = "#f3f3f3"
-        self.light_fg = "#000000"
-        self.light_btn = "#e1e1e1"
+        self.dark_accent = "#0078d4"
         
-        self.setup_styles()
+        self.light_bg = "#f3f3f3"
+        self.light_card = "#ffffff"
+        self.light_fg = "#000000"
+        self.light_accent = "#005a9e"
+        
         self.create_widgets()
         self.apply_theme()
 
-    def setup_styles(self):
-        self.style = ttk.Style()
-        self.style.theme_use('clam')
-        
+    def set_title_bar_color(self, is_dark):
+        """Toggle Windows Title Bar Dark/Light mode using DWM API."""
+        try:
+            # DWMWA_USE_IMMERSIVE_DARK_MODE = 20
+            hwnd = ctypes.windll.user32.GetParent(self.root.winfo_id())
+            value = ctypes.c_int(1 if is_dark else 0)
+            ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, 20, ctypes.byref(value), ctypes.sizeof(value))
+            # Refresh title bar
+            self.root.withdraw()
+            self.root.deiconify()
+        except:
+            pass
+
     def create_widgets(self):
-        # Container
-        self.main_frame = tk.Frame(self.root, padx=30, pady=20)
-        self.main_frame.pack(fill=tk.BOTH, expand=True)
+        # Background Canvas
+        self.bg_frame = tk.Frame(self.root)
+        self.bg_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Main Content Container
+        self.content = tk.Frame(self.bg_frame, padx=40, pady=30)
+        self.content.pack(fill=tk.BOTH, expand=True)
 
         # Header
-        header_frame = tk.Frame(self.main_frame, bg=self.main_frame.cget("bg"))
-        header_frame.pack(fill=tk.X, pady=(0, 20))
+        header = tk.Frame(self.content)
+        header.pack(fill=tk.X, pady=(0, 20))
         
-        tk.Label(header_frame, text="Claude ➜ Obsidian", font=("Segoe UI Semibold", 18)).pack(side=tk.LEFT)
-        self.theme_btn = tk.Button(header_frame, text="🌙", command=self.toggle_theme, font=("Segoe UI", 12), bd=0, cursor="hand2")
+        tk.Label(header, text="Claude ➜ Obsidian", font=("Segoe UI Variable Display", 22, "bold")).pack(side=tk.LEFT)
+        self.theme_btn = tk.Button(header, text="🌙", command=self.toggle_theme, font=("Segoe UI", 14), 
+                                   bd=0, relief="flat", cursor="hand2")
         self.theme_btn.pack(side=tk.RIGHT)
 
-        # Paths Section
-        self.create_path_row("Claude Memory DB:", 'db_path', self.browse_db)
-        self.create_path_row("Obsidian Vault:", 'vault_path', self.browse_vault)
+        # --- PATH SECTION ---
+        self.db_card = self.create_card("Claude Memory Database", "db_path", self.browse_db)
+        self.vault_card = self.create_card("Obsidian Vault", "vault_path", self.browse_vault)
 
-        # Settings Section
-        settings_label = tk.Label(self.main_frame, text="Automation Settings", font=("Segoe UI Semibold", 12))
-        settings_label.pack(anchor="w", pady=(20, 10))
+        # --- SETTINGS SECTION ---
+        self.settings_frame = tk.Frame(self.content)
+        self.settings_frame.pack(fill=tk.X, pady=15)
         
-        sync_frame = tk.Frame(self.main_frame)
-        sync_frame.pack(fill=tk.X, pady=5)
+        tk.Label(self.settings_frame, text="Sync Settings", font=("Segoe UI Variable Small", 11, "bold")).pack(anchor="w")
         
-        tk.Label(sync_frame, text="Sync Interval (minutes):", font=("Segoe UI", 10)).pack(side=tk.LEFT)
-        self.interval_entry = tk.Entry(sync_frame, width=10, font=("Segoe UI", 10))
+        interval_row = tk.Frame(self.settings_frame)
+        interval_row.pack(fill=tk.X, pady=5)
+        
+        tk.Label(interval_row, text="Update Interval:", font=("Segoe UI", 10)).pack(side=tk.LEFT)
+        self.interval_entry = tk.Entry(interval_row, width=8, font=("Segoe UI", 10), relief="flat", highlightthickness=1)
         self.interval_entry.insert(0, str(self.config.get('interval', 10)))
         self.interval_entry.pack(side=tk.LEFT, padx=10)
+        tk.Label(interval_row, text="minutes", font=("Segoe UI", 10)).pack(side=tk.LEFT)
 
-        # Actions
-        btn_container = tk.Frame(self.main_frame)
-        btn_container.pack(fill=tk.X, pady=30)
+        # --- ACTION BUTTONS ---
+        btn_frame = tk.Frame(self.content)
+        btn_frame.pack(fill=tk.X, pady=(20, 0))
 
-        self.btn_auto = tk.Button(btn_container, text="Auto-Detect Paths", command=self.auto_detect, font=("Segoe UI", 10), height=2)
-        self.btn_auto.pack(fill=tk.X, pady=5)
+        self.btn_auto = self.create_action_button(btn_frame, "Auto-Detect Environments", self.auto_detect)
+        self.btn_save = self.create_action_button(btn_frame, "Apply & Automate", self.setup_task, primary=True)
+        self.btn_sync = self.create_action_button(btn_frame, "Manual Sync Now", self.run_sync)
 
-        self.btn_save = tk.Button(btn_container, text="Save & Update Automation", command=self.setup_task, bg="#0078d4", fg="white", font=("Segoe UI", 10, "bold"), height=2)
-        self.btn_save.pack(fill=tk.X, pady=5)
-        
-        self.btn_sync = tk.Button(btn_container, text="Sync Now", command=self.run_sync, font=("Segoe UI", 10), height=2)
-        self.btn_sync.pack(fill=tk.X, pady=5)
-
-        # Status Bar
+        # Footer Status
         self.status_var = tk.StringVar(value="Ready")
-        self.status_bar = tk.Label(self.root, textvariable=self.status_var, bd=1, relief=tk.SUNKEN, anchor=tk.W, font=("Segoe UI", 9))
+        self.status_bar = tk.Label(self.root, textvariable=self.status_var, anchor="w", font=("Segoe UI", 9), padx=10, pady=8)
         self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
 
-    def create_path_row(self, label_text, config_key, browse_cmd):
-        frame = tk.Frame(self.main_frame)
-        frame.pack(fill=tk.X, pady=10)
+    def create_card(self, title, config_key, cmd):
+        card = tk.Frame(self.content, pady=10)
+        card.pack(fill=tk.X, pady=5)
         
-        tk.Label(frame, text=label_text, font=("Segoe UI", 10)).pack(anchor="w")
+        tk.Label(card, text=title, font=("Segoe UI Variable Small", 10)).pack(anchor="w", padx=2)
         
-        entry_frame = tk.Frame(frame)
-        entry_frame.pack(fill=tk.X, pady=2)
+        entry_row = tk.Frame(card)
+        entry_row.pack(fill=tk.X, pady=2)
         
-        entry = tk.Entry(entry_frame, font=("Segoe UI", 10))
+        entry = tk.Entry(entry_row, font=("Segoe UI", 10), relief="flat", highlightthickness=1)
         entry.insert(0, self.config.get(config_key, ''))
-        entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
+        entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10), ipady=4)
         
-        btn = tk.Button(entry_frame, text="Browse", command=browse_cmd, font=("Segoe UI", 9))
+        btn = tk.Button(entry_row, text="Browse", command=cmd, font=("Segoe UI", 9), 
+                        relief="flat", bd=0, padx=15, cursor="hand2")
         btn.pack(side=tk.RIGHT)
         
         setattr(self, f"{config_key}_entry", entry)
+        return card
+
+    def create_action_button(self, parent, text, cmd, primary=False):
+        btn = tk.Button(parent, text=text, command=cmd, font=("Segoe UI", 10, "bold" if primary else "normal"),
+                        relief="flat", bd=0, pady=10, cursor="hand2")
+        btn.pack(fill=tk.X, pady=4)
+        return btn
+
+    def apply_theme(self):
+        is_dark = self.config.get('theme') == "dark"
+        bg = self.dark_bg if is_dark else self.light_bg
+        card_bg = self.dark_card if is_dark else self.light_card
+        fg = self.dark_fg if is_dark else self.light_fg
+        accent = self.dark_accent if is_dark else self.light_accent
+        
+        self.set_title_bar_color(is_dark)
+        
+        self.bg_frame.configure(bg=bg)
+        self.content.configure(bg=bg)
+        self.status_bar.configure(bg=card_bg, fg=fg)
+        self.theme_btn.configure(text="☀️" if is_dark else "🌙", bg=bg, fg=fg, activebackground=bg, activeforeground=fg)
+        
+        self.style_recursive(self.content, bg, card_bg, fg, accent)
+
+    def style_recursive(self, parent, bg, card_bg, fg, accent):
+        for widget in parent.winfo_children():
+            w_class = widget.winfo_class()
+            
+            if w_class == "Frame":
+                widget.configure(bg=bg)
+                self.style_recursive(widget, bg, card_bg, fg, accent)
+            elif w_class == "Label":
+                widget.configure(bg=bg, fg=fg)
+            elif w_class == "Entry":
+                widget.configure(bg=card_bg, fg=fg, insertbackground=fg, 
+                                 highlightbackground=accent if bg == self.dark_bg else "#cccccc", 
+                                 highlightcolor=accent, bd=0)
+            elif w_class == "Button":
+                if widget == self.btn_save:
+                    widget.configure(bg=accent, fg="white", activebackground=accent)
+                else:
+                    widget.configure(bg=card_bg, fg=fg, activebackground=bg, activeforeground=fg)
+            
+            # Special case for card rows (they should have bg)
+            if parent in [self.db_card, self.vault_card, self.settings_frame]:
+                parent.configure(bg=bg)
 
     def load_config(self):
         if os.path.exists(self.config_path):
@@ -107,6 +170,7 @@ class App:
         self.config['vault_path'] = self.vault_path_entry.get()
         self.config['interval'] = int(self.interval_entry.get() if self.interval_entry.get() else 10)
         self.config['state_path'] = os.path.join(os.path.dirname(__file__), 'sync_state.json')
+        self.config['theme'] = self.config.get('theme', 'dark')
         with open(self.config_path, 'w') as f:
             json.dump(self.config, f, indent=4)
 
@@ -114,40 +178,6 @@ class App:
         self.config['theme'] = "light" if self.config.get('theme') == "dark" else "dark"
         self.apply_theme()
         self.save_config()
-
-    def apply_theme(self):
-        is_dark = self.config.get('theme') == "dark"
-        bg = self.dark_bg if is_dark else self.light_bg
-        fg = self.dark_fg if is_dark else self.light_fg
-        btn_bg = self.dark_btn if is_dark else self.light_btn
-        
-        self.root.configure(bg=bg)
-        self.main_frame.configure(bg=bg)
-        self.theme_btn.configure(text="☀️" if is_dark else "🌙", bg=bg, fg=fg)
-        
-        self.color_widget(self.main_frame, bg, fg, btn_bg)
-        self.status_bar.configure(bg=btn_bg, fg=fg)
-
-    def color_widget(self, widget, bg, fg, btn_bg):
-        w_type = widget.winfo_class()
-        
-        try:
-            # All widgets get a background
-            widget.configure(bg=bg)
-            
-            # Only certain widgets get a foreground
-            if w_type in ("Label", "Button", "Entry"):
-                widget.configure(fg=fg)
-                
-            if w_type == "Button" and widget != self.btn_save:
-                widget.configure(bg=btn_bg, activebackground=bg, activeforeground=fg)
-            elif w_type == "Entry":
-                widget.configure(bg=btn_bg, insertbackground=fg)
-        except:
-            pass # Ignore options not supported by specific widget types
-            
-        for child in widget.winfo_children():
-            self.color_widget(child, bg, fg, btn_bg)
 
     def browse_db(self):
         path = filedialog.askopenfilename(title="Select claude-mem.db", filetypes=[("SQLite DB", "*.db")])
@@ -210,6 +240,12 @@ class App:
             messagebox.showerror("Error", f"Failed to create task: {e}")
 
 if __name__ == "__main__":
+    # Fix High DPI scaling
+    try:
+        ctypes.windll.shcore.SetProcessDpiAwareness(1)
+    except:
+        pass
+        
     root = tk.Tk()
     app = App(root)
     root.mainloop()
