@@ -130,12 +130,21 @@ class App:
 
     def color_widget(self, widget, bg, fg, btn_bg):
         w_type = widget.winfo_class()
-        if w_type in ("Frame", "Label"):
-            widget.configure(bg=bg, fg=fg)
-        elif w_type == "Button" and widget != self.theme_btn and widget != self.btn_save:
-            widget.configure(bg=btn_bg, fg=fg, activebackground=bg, activeforeground=fg)
-        elif w_type == "Entry":
-            widget.configure(bg=btn_bg, fg=fg, insertbackground=fg, bd=1)
+        
+        try:
+            # All widgets get a background
+            widget.configure(bg=bg)
+            
+            # Only certain widgets get a foreground
+            if w_type in ("Label", "Button", "Entry"):
+                widget.configure(fg=fg)
+                
+            if w_type == "Button" and widget != self.btn_save:
+                widget.configure(bg=btn_bg, activebackground=bg, activeforeground=fg)
+            elif w_type == "Entry":
+                widget.configure(bg=btn_bg, insertbackground=fg)
+        except:
+            pass # Ignore options not supported by specific widget types
             
         for child in widget.winfo_children():
             self.color_widget(child, bg, fg, btn_bg)
