@@ -1,0 +1,20 @@
+<svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="flow-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7c3aed"/>
+      <stop offset="1" stop-color="#4c1d95"/>
+    </linearGradient>
+  </defs>
+  <rect x="16" y="16" width="224" height="224" rx="52" fill="url(#flow-bg)"/>
+  <!-- Orange source dot (Claude) -->
+  <circle cx="88" cy="140" r="22" fill="#ff8a3d"/>
+  <!-- White destination dot (Obsidian vault) -->
+  <circle cx="168" cy="140" r="22" fill="#ffffff"/>
+  <!-- Flow arc with arrowhead -->
+  <path d="M 88 116 Q 128 72, 168 116"
+        stroke="#ffffff" stroke-width="5" fill="none"
+        stroke-linecap="round" opacity="0.75"/>
+  <path d="M 158 108 L 170 116 L 158 126"
+        stroke="#ffffff" stroke-width="5" fill="none"
+        stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>
+</svg>

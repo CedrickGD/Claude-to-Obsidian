@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Logo concepts — Claude-to-Obsidian</title>
+<style>
+  body {
+    font-family: "Segoe UI Variable Text", "Segoe UI", -apple-system, Inter, system-ui, sans-serif;
+    background: #1a1a22;
+    color: #e4e4e7;
+    margin: 0;
+    padding: 40px;
+  }
+  h1 { font-weight: 600; letter-spacing: -0.5px; margin: 0 0 8px; font-size: 28px; }
+  .sub { color: #a1a1aa; margin: 0 0 32px; font-size: 14px; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; max-width: 1400px; }
+  .card {
+    background: #23232e;
+    border: 1px solid #333340;
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .card h2 { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
+  .card .desc { font-size: 13px; color: #a1a1aa; margin: 0 0 20px; min-height: 36px; }
+  .sizes {
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    margin-bottom: 16px;
+    padding: 16px;
+    background: #1a1a22;
+    border-radius: 12px;
+  }
+  .size { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .size img, .size object { display: block; }
+  .size .label { font-size: 11px; color: #71717a; }
+  .on-light {
+    background: #f3f3f3;
+    padding: 16px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+</style>
+</head>
+<body>
+  <h1>Logo concepts</h1>
+  <p class="sub">4 directions. Pick one to refine (or say "none of them — try again").</p>
+
+  <div class="grid">
+    <div class="card">
+      <h2>1. Flow</h2>
+      <p class="desc">Two dots + connecting arc. Most literal — "sync from A to B."</p>
+      <div class="sizes">
+        <div class="size"><object data="flow.svg" width="16" height="16"></object><span class="label">16</span></div>
+        <div class="size"><object data="flow.svg" width="32" height="32"></object><span class="label">32</span></div>
+        <div class="size"><object data="flow.svg" width="64" height="64"></object><span class="label">64</span></div>
+        <div class="size"><object data="flow.svg" width="128" height="128"></object><span class="label">128</span></div>
+        <div class="size"><object data="flow.svg" width="256" height="256"></object><span class="label">256</span></div>
+      </div>
+      <div class="on-light"><object data="flow.svg" width="32"></object><object data="flow.svg" width="64"></object></div>
+    </div>
+
+    <div class="card">
+      <h2>2. Portal</h2>
+      <p class="desc">Two overlapping ellipses with screen blend. Abstract — "memories merging."</p>
+      <div class="sizes">
+        <div class="size"><object data="portal.svg" width="16" height="16"></object><span class="label">16</span></div>
+        <div class="size"><object data="portal.svg" width="32" height="32"></object><span class="label">32</span></div>
+        <div class="size"><object data="portal.svg" width="64" height="64"></object><span class="label">64</span></div>
+        <div class="size"><object data="portal.svg" width="128" height="128"></object><span class="label">128</span></div>
+        <div class="size"><object data="portal.svg" width="256" height="256"></object><span class="label">256</span></div>
+      </div>
+      <div class="on-light"><object data="portal.svg" width="32"></object><object data="portal.svg" width="64"></object></div>
+    </div>
+
+    <div class="card">
+      <h2>3. Arrow</h2>
+      <p class="desc">Single bold gradient arrow. Minimal — "transfer."</p>
+      <div class="sizes">
+        <div class="size"><object data="arrow.svg" width="16" height="16"></object><span class="label">16</span></div>
+        <div class="size"><object data="arrow.svg" width="32" height="32"></object><span class="label">32</span></div>
+        <div class="size"><object data="arrow.svg" width="64" height="64"></object><span class="label">64</span></div>
+        <div class="size"><object data="arrow.svg" width="128" height="128"></object><span class="label">128</span></div>
+        <div class="size"><object data="arrow.svg" width="256" height="256"></object><span class="label">256</span></div>
+      </div>
+      <div class="on-light"><object data="arrow.svg" width="32"></object><object data="arrow.svg" width="64"></object></div>
+    </div>
+
+    <div class="card">
+      <h2>4. Monogram</h2>
+      <p class="desc">"c•o" mark on warm gradient. Branding-first.</p>
+      <div class="sizes">
+        <div class="size"><object data="monogram.svg" width="16" height="16"></object><span class="label">16</span></div>
+        <div class="size"><object data="monogram.svg" width="32" height="32"></object><span class="label">32</span></div>
+        <div class="size"><object data="monogram.svg" width="64" height="64"></object><span class="label">64</span></div>
+        <div class="size"><object data="monogram.svg" width="128" height="128"></object><span class="label">128</span></div>
+        <div class="size"><object data="monogram.svg" width="256" height="256"></object><span class="label">256</span></div>
+      </div>
+      <div class="on-light"><object data="monogram.svg" width="32"></object><object data="monogram.svg" width="64"></object></div>
+    </div>
+  </div>
+</body>
+</html>

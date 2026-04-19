@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Claude to Obsidian",
+  "version": "0.1.0",
+  "identifier": "com.cedrickgd.claude-to-obsidian",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../build"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Claude to Obsidian",
+        "width": 720,
+        "height": 720,
+        "minWidth": 480,
+        "minHeight": 540,
+        "resizable": true,
+        "decorations": true,
+        "theme": null,
+        "titleBarStyle": "Visible"
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "Productivity",
+    "shortDescription": "Sync Claude memories into Obsidian",
+    "longDescription": "A native desktop sync tool that exports Claude Code observations and session summaries as Markdown into an Obsidian vault.",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "macOS": {
+      "minimumSystemVersion": "11.0"
+    }
+  }
+}
